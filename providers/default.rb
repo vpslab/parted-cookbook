@@ -1,5 +1,7 @@
 action :create do
   if blank_disk?
+    clear_partition_table_resource(:run)
+
     start_sector = 2048
     new_resource.primary_partitions.each_with_index do |partition, index|
       partition_device = "#{new_resource.device}#{index + 1}"
@@ -15,7 +17,7 @@ action :create do
 end
 
 action :destroy do
-  clear_partition_table_resource(:run) unless blank_disk?
+  clear_partition_table_resource(:run)
 end
 
 def blank_disk?
