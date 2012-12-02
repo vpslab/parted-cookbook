@@ -3,7 +3,7 @@ action :create do
     start_sector = 2048
     new_resource.primary_partitions.each_with_index do |partition, index|
       partition_device = "#{new_resource.device}#{index + 1}"
-      end_sector = start_sector + size_in_sectors(partition.size) - 1
+      end_sector = start_sector + ::Parted::Utils.size_in_sectors(partition.size) - 1
 
       create_partition_resource(:run, partition_device, start_sector, end_sector)
       format_partition_resource(:run, partition_device, partition.fstype)
@@ -65,16 +65,4 @@ def format_partition_resource(exec_action, partition_device, fstype)
   end
   r.run_action(exec_action)
   new_resource.updated_by_last_action(true) if r.updated_by_last_action?
-end
-
-def size_in_sectors(value)
-  sector_size = 512
-  alignment   = 1024
-  case value
-  when /M$/ then value.to_i * 1000 * alignment / sector_size
-  when /G$/ then value.to_i * 1000 * 1000 * alignment / sector_size
-  when /s/  then value.to_i
-  else
-    raise "Could not convert #{value} to sectors"
-  end
 end
